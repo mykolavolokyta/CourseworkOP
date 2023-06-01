@@ -1,4 +1,3 @@
-import tkinter as tk
 from numpy import *
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -7,12 +6,14 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 class Graphic:
     def __init__(self, equation):
         self.equation = equation.replace("^", "**")
-        f = vectorize(self.function)
-        x = linspace(-10, 10, 100)
-        figure = plt.figure(figsize=(4, 4), dpi=100)
-        figure.add_subplot(111).plot(x, f(x), color="red")
-        self.chart = FigureCanvasTkAgg(figure)
-        self.chart.get_tk_widget().grid(row=4, column=3, columnspan=2, rowspan=8, sticky='n')
+        if self.equation == "":
+            self.figure = plt.figure(figsize=(4, 4), dpi=100)
+        else:
+            f = vectorize(self.function)
+            x = linspace(-10, 10, 100)
+            self.figure = plt.figure(figsize=(4, 4), dpi=100)
+            self.figure.add_subplot(111).plot(x, f(x), color="red")
+        self.chart = FigureCanvasTkAgg(self.figure)
         plt.grid(True)
         plt.xlim([-10, 10])
         plt.ylim([-10, 10])

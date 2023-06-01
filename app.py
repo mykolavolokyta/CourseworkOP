@@ -1,5 +1,5 @@
-from tkinter.messagebox import showwarning
-import numpy as np
+import tkinter as tk
+from tkinter import filedialog
 from Graphic import *
 from Statistics import *
 
@@ -24,7 +24,6 @@ class App(tk.Tk):
         self.initial_guess_entry = tk.Entry()
         self.max_iterations = tk.StringVar()
         self.max_iterations_entry = tk.Entry()
-
         tk.Label(self, text="Введіть рівняння: ", font=("Times New Roman", 12), bg=self.COLOR).grid(row=0, column=0, columnspan=2)
         self.equation = tk.StringVar()
         self.entry = tk.Entry(self, textvariable=self.equation, justify=tk.CENTER)
@@ -59,14 +58,9 @@ class App(tk.Tk):
 
         tk.Label(self, text="Графік", font=("Times New Roman", 12), bg=self.COLOR).grid(row=5, column=3, columnspan=2)
 
-        self.figure = plt.figure(figsize=(4, 4), dpi=100)
-        chart = FigureCanvasTkAgg(self.figure, self)
-        chart.get_tk_widget().grid(row=6, column=3, columnspan=2, rowspan=8, sticky='n')
-        plt.grid(True)
-        plt.xlim([-10, 10])
-        plt.ylim([-10, 10])
-        plt.axhline(linewidth=2, color='black')
-        plt.axvline(linewidth=2, color='black')
+        self.statistics = None
+        self.graphic = Graphic("")
+        self.graphic.chart.get_tk_widget().grid(row=6, column=3, columnspan=2, rowspan=8, sticky='n')
 
     def make_bisect_frame(self):
         for widget in self.method_frame.winfo_children():
@@ -148,65 +142,79 @@ class App(tk.Tk):
             if self.method.get() == "secant":
                 self.solve_secant()
             return True
+        except ZeroDivisionError:
+            showwarning("Помилка", "Ділення на 0.")
         except FloatingPointError:
             showwarning("Помилка", "Неприпустиме значення.")
         except (NameError, SyntaxError):
             showwarning("Помилка", "Некоректний ввід.")
         except ValueError:
             showwarning("Помилка", "Заповніть всі поля коректно.")
-        except ZeroDivisionError:
-            showwarning("Помилка", "Ділення на 0.")
         except MethodException as e:
             showwarning("Помилка", e)
+        except OverflowError:
+            showwarning("Помилка", "Задано завеликі значення")
         return False
 
     def solve_bisect(self):
         bisect = BisectMethod(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()))
+        result = bisect.b_solve()
         self.result.configure(state="normal")
         self.result.delete(0, tk.END)
-        self.result.insert(0, bisect.b_solve())
+        self.result.insert(0, result)
         self.result.configure(state="readonly")
 
     def solve_newton(self):
         newton = NewtonMethod(self.equation.get(), float(self.initial_guess.get()), float(self.e.get()), int(self.max_iterations.get()))
+        result = newton.n_solve()
         self.result.configure(state="normal")
         self.result.delete(0, tk.END)
-        self.result.insert(0, newton.n_solve())
+        self.result.insert(0, result)
         self.result.configure(state="readonly")
 
     def solve_secant(self):
         secant = SecantMethod(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()), int(self.max_iterations.get()))
+        result = secant.s_solve()
         self.result.configure(state="normal")
         self.result.delete(0, tk.END)
-        self.result.insert(0, secant.s_solve())
+        self.result.insert(0, result)
         self.result.configure(state="readonly")
 
     def analyze(self):
         try:
-            statistics = Statistics(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()), float(self.initial_guess.get()), int(self.max_iterations.get()))
-            statistics.get_statistics()
+            self.statistics = Statistics(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()), float(self.initial_guess.get()), int(self.max_iterations.get()))
+            self.statistics.get_statistics()
+        except ZeroDivisionError:
+            showwarning("Помилка", "Ділення на 0.")
         except (NameError, SyntaxError):
             showwarning("Помилка", "Некоректний ввід.")
         except ValueError:
             showwarning("Помилка", "Заповніть всі поля коректно.")
+        except FloatingPointError:
+            showwarning("Помилка", "Неприпустиме значення.")
         except MethodException as e:
             showwarning("Помилка", e)
+        except OverflowError:
+            showwarning("Помилка", "Задано завеликі значення")
 
     def save_to_file(self):
         try:
             if self.solve():
                 result = self.equation.get() + " = 0   =>   x = " + str(self.result.get())
-                with open("result.txt", "w") as file:
-                    file.write(result)
-                showinfo("Перемога", "Збережено до файлу.")
+                filepath = filedialog.asksaveasfilename()
+                if filepath != "":
+                    with open(filepath, "w") as file:
+                        file.write(result)
+                    showinfo("Перемога", "Збережено до файлу.")
         except OSError:
             showwarning("Помилка", "Помилка при відкритті файла")
 
     def print_graphic(self):
         try:
-            graphic = Graphic(self.equation.get())
-            graphic.chart.get_tk_widget().grid(row=6, column=3, columnspan=2, rowspan=8, sticky='n')
+            plt.close(self.graphic.figure)
+            self.graphic = Graphic(self.equation.get())
+            self.graphic.chart.get_tk_widget().grid(row=6, column=3, columnspan=2, rowspan=8, sticky='n')
         except (NameError, SyntaxError):
             showwarning("Помилка", "Некоректний ввід.")
-        except ValueError:
-            showwarning("Помилка", "Заповніть всі поля коректно.")
+        except OverflowError:
+            showwarning("Помилка", "Задано завеликі значення")
