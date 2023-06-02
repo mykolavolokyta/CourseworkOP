@@ -23,7 +23,7 @@ class SecantMethod(Method):
         self.max_iterations = max_iterations
         self.s_iterations = 0
 
-    def s_solve(self):
+    def s_solve(self, widget=None):
         if self.function(self.a) * self.function(self.b) >= 0:
             raise MethodException("Значення функції в точках 'a' та 'b' мають мати різні знаки.")
 
@@ -31,44 +31,41 @@ class SecantMethod(Method):
         x1 = self.b
         self.s_iterations = 0
 
-        root = tk.Tk()
-        root.resizable(False, False)
-        root.title("Результат")
-        root.geometry(f"+1020+20")
-        text = tk.Text(root, wrap="word", width=40)
-        text.grid(column=0, row=0, sticky=tk.NSEW)
+        if widget:
+            widget.configure(state="normal")
+            widget.delete("1.0", tk.END)
+            widget.insert(tk.END, f"{self.equation} = 0\nМетод січних:\n\n\n\n")
+            widget.configure(state="disabled")
 
-        ys = tk.Scrollbar(root, orient="vertical", command=text.yview)
-        ys.grid(column=1, row=0, sticky=tk.NS)
-
-        text["yscrollcommand"] = ys.set
-
-        text.insert(tk.END, f"{self.equation} = 0\nМетод січних:\n\n\n\n")
         try:
             while abs(self.function(x1)) > self.tolerance and self.s_iterations < self.max_iterations:
                 self.s_iterations += 1
                 x2 = x1 - (self.function(x1) * (x1 - x0)) / (self.function(x1) - self.function(x0))
                 x0 = x1
                 x1 = x2
-                text.configure(state="normal")
-                text.insert(tk.END, f"Ітерація {self.s_iterations}\nx = {x1}\n\n")
-                text.configure(state="disabled")
+                if widget:
+                    widget.configure(state="normal")
+                    widget.insert(tk.END, f"Ітерація {self.s_iterations}\nx = {x1}\n\n")
+                    widget.configure(state="disabled")
         except Exception as e:
-            text.configure(state="normal")
-            text.insert("3.0", f"Помилка\n")
-            text.insert("4.0", f"Ітерацій: {self.s_iterations}")
-            text.insert(tk.END, f"Ітерація {self.s_iterations}\nПомилка")
-            text.configure(state="disabled")
+            if widget:
+                widget.configure(state="normal")
+                widget.insert("3.0", f"Помилка\n")
+                widget.insert("4.0", f"Ітерацій: {self.s_iterations}")
+                widget.insert(tk.END, f"Ітерація {self.s_iterations}\nПомилка")
+                widget.configure(state="disabled")
             raise e
 
         if abs(self.function(x1)) <= self.tolerance:
-            text.configure(state="normal")
-            text.insert("3.0", f"x = {x1}")
-            text.insert("4.0", f"Ітерацій: {self.s_iterations}")
-            text.configure(state="disabled")
+            if widget:
+                widget.configure(state="normal")
+                widget.insert("3.0", f"x = {x1}")
+                widget.insert("4.0", f"Ітерацій: {self.s_iterations}")
+                widget.configure(state="disabled")
             return x1
         else:
-            text.configure(state="normal")
-            text.insert("3.0", f"Метод не збігся за {self.s_iterations} ітерацій.")
-            text.configure(state="disabled")
-            raise MethodException("Метод не збігся за вказану кількість ітерацій.")
+            if widget:
+                widget.configure(state="normal")
+                widget.insert("3.0", f"Метод не збігся за {self.s_iterations} ітерацій.")
+                widget.configure(state="disabled")
+            raise MethodException("Метод січних не збігся за вказану кількість ітерацій.")

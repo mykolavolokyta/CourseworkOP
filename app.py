@@ -9,7 +9,7 @@ class App(tk.Tk):
         super().__init__()
 
         self.title("Калькулятор трансцендентних рівнянь")
-        self.geometry(f"800x620")
+        self.geometry(f"1000x620")
         self.resizable(False, False)
         self.COLOR = "#1bbce5"
         self.configure(bg=self.COLOR)
@@ -45,22 +45,30 @@ class App(tk.Tk):
         tk.Label(self, text="", font=("Times New Roman", 1), bg=self.COLOR).grid(row=10, column=0, columnspan=2)
         tk.Button(self, text="Побудувати графік", command=self.print_graphic, width=30, height=3).grid(row=11, column=0, columnspan=2)
 
-        tk.Label(self, text="", font=("Times New Roman", 12), bg=self.COLOR, padx=50).grid(row=0, column=2)
-        tk.Label(self, text="Результат", font=("Times New Roman", 12), bg=self.COLOR).grid(row=0, column=3, columnspan=2)
-        tk.Label(self, text="X =", font=("Times New Roman", 14), bg=self.COLOR).grid(row=1, column=3, sticky='e')
+        tk.Label(self, text="Хід розв'язку", font=("Times New Roman", 12), bg=self.COLOR, padx=50).grid(row=0, column=2)
+        self.solution = tk.Text(self, font=("Times New Roman", 12), state="disabled", width=30, height=30)
+        self.solution.grid(row=1, column=2, rowspan=20, sticky="n")
+
+        ys = tk.Scrollbar(orient="vertical", command=self.solution.yview)
+        ys.grid(row=1, column=2, rowspan=20, sticky="nse")
+        self.solution["yscrollcommand"] = ys.set
+
+        tk.Label(self, text="", font=("Times New Roman", 12), bg=self.COLOR, padx=15).grid(row=0, column=3)
+        tk.Label(self, text="Результат", font=("Times New Roman", 12), bg=self.COLOR).grid(row=0, column=4, columnspan=2)
+        tk.Label(self, text="X =", font=("Times New Roman", 14), bg=self.COLOR).grid(row=1, column=4, sticky='e')
         self.result = tk.Entry(self, font=("Times New Roman", 12), justify=tk.CENTER, width=20, state="readonly")
-        self.result.grid(row=1, column=4, sticky='w')
+        self.result.grid(row=1, column=5, sticky='w')
 
-        tk.Label(self, text="", font=("Times New Roman", 12), bg=self.COLOR, pady=1).grid(row=2, column=2, columnspan=2)
-        tk.Button(self, text="Аналітика", command=self.analyze, width=10).grid(row=3, column=3)
-        tk.Button(self, text="Зберегти в файл", command=self.save_to_file, width=15).grid(row=3, column=4)
-        tk.Label(self, text="", font=("Times New Roman", 12), bg=self.COLOR, pady=2).grid(row=4, column=2, columnspan=2)
+        tk.Label(self, text="", font=("Times New Roman", 12), bg=self.COLOR, pady=1).grid(row=2, column=3, columnspan=2)
+        tk.Button(self, text="Аналітика", command=self.analyze, width=10).grid(row=3, column=4)
+        tk.Button(self, text="Зберегти в файл", command=self.save_to_file, width=15).grid(row=3, column=5)
+        tk.Label(self, text="", font=("Times New Roman", 12), bg=self.COLOR, pady=2).grid(row=4, column=3, columnspan=2)
 
-        tk.Label(self, text="Графік", font=("Times New Roman", 12), bg=self.COLOR).grid(row=5, column=3, columnspan=2)
+        tk.Label(self, text="Графік", font=("Times New Roman", 12), bg=self.COLOR).grid(row=5, column=4, columnspan=2)
 
         self.statistics = None
         self.graphic = Graphic("")
-        self.graphic.chart.get_tk_widget().grid(row=6, column=3, columnspan=2, rowspan=8, sticky='n')
+        self.graphic.chart.get_tk_widget().grid(row=6, column=4, columnspan=2, rowspan=8, sticky='n')
 
     def make_bisect_frame(self):
         for widget in self.method_frame.winfo_children():
@@ -158,7 +166,7 @@ class App(tk.Tk):
 
     def solve_bisect(self):
         bisect = BisectMethod(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()))
-        result = bisect.b_solve()
+        result = bisect.b_solve(self.solution)
         self.result.configure(state="normal")
         self.result.delete(0, tk.END)
         self.result.insert(0, result)
@@ -166,7 +174,7 @@ class App(tk.Tk):
 
     def solve_newton(self):
         newton = NewtonMethod(self.equation.get(), float(self.initial_guess.get()), float(self.e.get()), int(self.max_iterations.get()))
-        result = newton.n_solve()
+        result = newton.n_solve(self.solution)
         self.result.configure(state="normal")
         self.result.delete(0, tk.END)
         self.result.insert(0, result)
@@ -174,7 +182,7 @@ class App(tk.Tk):
 
     def solve_secant(self):
         secant = SecantMethod(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()), int(self.max_iterations.get()))
-        result = secant.s_solve()
+        result = secant.s_solve(self.solution)
         self.result.configure(state="normal")
         self.result.delete(0, tk.END)
         self.result.insert(0, result)
@@ -213,7 +221,7 @@ class App(tk.Tk):
         try:
             plt.close(self.graphic.figure)
             self.graphic = Graphic(self.equation.get())
-            self.graphic.chart.get_tk_widget().grid(row=6, column=3, columnspan=2, rowspan=8, sticky='n')
+            self.graphic.chart.get_tk_widget().grid(row=6, column=4, columnspan=2, rowspan=8, sticky='n')
         except (NameError, SyntaxError):
             showwarning("Помилка", "Некоректний ввід.")
         except OverflowError:
