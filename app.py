@@ -4,7 +4,9 @@ from Graphic import *
 from Statistics import *
 
 
+# Основний клас програми
 class App(tk.Tk):
+    # Конструктор
     def __init__(self):
         super().__init__()
 
@@ -70,6 +72,7 @@ class App(tk.Tk):
         self.graphic = Graphic("")
         self.graphic.chart.get_tk_widget().grid(row=6, column=4, columnspan=2, rowspan=8, sticky='n')
 
+    # Метод для створення віджета, що містить параметри, необхідні для методу половинного ділення
     def make_bisect_frame(self):
         for widget in self.method_frame.winfo_children():
             widget.destroy()
@@ -87,6 +90,7 @@ class App(tk.Tk):
         self.e_entry.grid(row=3, column=3, sticky='w')
         tk.Button(self.method_frame, text="Очистити", command=self.delete_bisect, width=30).grid(row=4, column=0, columnspan=20)
 
+    # Метод для створення віджета, що містить параметри, необхідні для методу Ньютона
     def make_newton_frame(self):
         for widget in self.method_frame.winfo_children():
             widget.destroy()
@@ -104,6 +108,7 @@ class App(tk.Tk):
         self.max_iterations_entry.grid(row=5, column=1, sticky='w')
         tk.Button(self.method_frame, text="Очистити", command=self.delete_newton, width=30).grid(row=6, column=0, columnspan=2)
 
+    # Метод для створення віджета, що містить параметри, необхідні для методу січних
     def make_secant_frame(self):
         for widget in self.method_frame.winfo_children():
             widget.destroy()
@@ -124,22 +129,26 @@ class App(tk.Tk):
         self.max_iterations_entry.grid(row=5, column=3, sticky='w')
         tk.Button(self.method_frame, text="Очистити", command=self.delete_secant, width=30).grid(row=6, column=0, columnspan=20)
 
+    # Очищення полів параметрів, необхідних для методу половинного ділення
     def delete_bisect(self):
         self.a_entry.delete(0, tk.END)
         self.b_entry.delete(0, tk.END)
         self.e_entry.delete(0, tk.END)
 
+    # Очищення полів параметрів, необхідних для методу Ньютона
     def delete_newton(self):
         self.initial_guess_entry.delete(0, tk.END)
         self.e_entry.delete(0, tk.END)
         self.max_iterations_entry.delete(0, tk.END)
 
+    # Очищення полів параметрів, необхідних для методу січних
     def delete_secant(self):
         self.a_entry.delete(0, tk.END)
         self.b_entry.delete(0, tk.END)
         self.e_entry.delete(0, tk.END)
         self.max_iterations_entry.delete(0, tk.END)
 
+    # Метод для обчислення трансцендентного рівняння обраним методом
     def solve(self):
         try:
             self.equation.set(self.equation.get().replace("^", "**"))
@@ -164,6 +173,7 @@ class App(tk.Tk):
             showwarning("Помилка", "Задано завеликі значення")
         return False
 
+    # Метод для обчислення трансцендентного рівняння методом половинного ділення
     def solve_bisect(self):
         bisect = BisectMethod(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()))
         result = bisect.b_solve(self.solution)
@@ -172,6 +182,7 @@ class App(tk.Tk):
         self.result.insert(0, result)
         self.result.configure(state="readonly")
 
+    # Метод для обчислення трансцендентного рівняння методом Ньютона
     def solve_newton(self):
         newton = NewtonMethod(self.equation.get(), float(self.initial_guess.get()), float(self.e.get()), int(self.max_iterations.get()))
         result = newton.n_solve(self.solution)
@@ -180,6 +191,7 @@ class App(tk.Tk):
         self.result.insert(0, result)
         self.result.configure(state="readonly")
 
+    # Метод для обчислення трансцендентного рівняння методом січних
     def solve_secant(self):
         secant = SecantMethod(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()), int(self.max_iterations.get()))
         result = secant.s_solve(self.solution)
@@ -188,6 +200,7 @@ class App(tk.Tk):
         self.result.insert(0, result)
         self.result.configure(state="readonly")
 
+    # Метод для виведення статистичних даних (кількість ітерацій) для кожного алгоритму
     def analyze(self):
         try:
             self.statistics = Statistics(self.equation.get(), float(self.a.get()), float(self.b.get()), float(self.e.get()), float(self.initial_guess.get()), int(self.max_iterations.get()))
@@ -205,6 +218,7 @@ class App(tk.Tk):
         except OverflowError:
             showwarning("Помилка", "Задано завеликі значення")
 
+    # Метод для виведення збереження результату розв'язку в файл
     def save_to_file(self):
         try:
             if self.solve():
@@ -217,6 +231,7 @@ class App(tk.Tk):
         except OSError:
             showwarning("Помилка", "Помилка при відкритті файла")
 
+    # Метод для побудови графіку трансцендентного рівняння
     def print_graphic(self):
         try:
             plt.close(self.graphic.figure)

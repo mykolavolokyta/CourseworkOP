@@ -4,7 +4,9 @@ from Method import *
 from MethodException import *
 
 
+# Клас, який представляє метод січних
 class SecantMethod(Method):
+    # Конструктор
     def __init__(self, equation, a, b, tolerance, max_iterations):
         if a >= b:
             raise MethodException("'a' має бути менше за 'b'.")
@@ -12,10 +14,12 @@ class SecantMethod(Method):
             raise MethodException("'a' та 'b' мають бути в межах [-10000, 10000].")
         if tolerance <= 0:
             raise MethodException("Точність має бути додатною.")
-        if max_iterations <= 0:
-            raise MethodException("Кількість ітерацій має бути додатною.")
         if tolerance >= 10:
             raise MethodException("Точність має меншою за 10.")
+        if max_iterations <= 0:
+            raise MethodException("Кількість ітерацій має бути додатною.")
+        if max_iterations > 1000000:
+            raise MethodException("Кількість ітерацій має бути меншою за 1000000.")
         Method.__init__(self, equation)
         self.a = a
         self.b = b
@@ -23,6 +27,8 @@ class SecantMethod(Method):
         self.max_iterations = max_iterations
         self.s_iterations = 0
 
+    # Метод для розв'язку рівняння методом січних
+    # Якщо в метод передається параметр widget, то в нього записується хід розв'язку
     def s_solve(self, widget=None):
         if self.function(self.a) * self.function(self.b) >= 0:
             raise MethodException("Значення функції в точках 'a' та 'b' мають мати різні знаки.")

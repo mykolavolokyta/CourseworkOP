@@ -4,7 +4,9 @@ from Method import *
 from MethodException import *
 
 
+# Клас, який представляє метод половинного ділення
 class BisectMethod(Method):
+    # Конструктор
     def __init__(self, equation, a, b, tolerance):
         if a >= b:
             raise MethodException("'a' має бути менше за 'b'.")
@@ -20,6 +22,8 @@ class BisectMethod(Method):
         self.tolerance = tolerance
         self.b_iterations = 0
 
+    # Метод для розв'язку рівняння методом половинного ділення
+    # Якщо в метод передається параметр widget, то в нього записується хід розв'язку
     def b_solve(self, widget=None):
         a = self.a
         b = self.b

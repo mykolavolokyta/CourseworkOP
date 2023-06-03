@@ -3,7 +3,9 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
+# Клас, який представляє графік трансцендентної функції
 class Graphic:
+    # Конструктор
     def __init__(self, equation):
         self.equation = equation.replace("^", "**")
         if self.equation == "":
@@ -20,6 +22,7 @@ class Graphic:
         plt.axhline(linewidth=2, color='black')
         plt.axvline(linewidth=2, color='black')
 
+    # Метод для отримання значення трансцендентної фунції у вказаній точці "х"
     def function(self, x):
         seterr(all='warn')
         return eval(self.equation).real
